@@ -1,10 +1,24 @@
-package com.example.crud;
+package com.example.crud.Model;
+
+import jakarta.validation.constraints.*;
 
 public class Produto {
+
+    @NotBlank
     private String nome;
+
+    @NotNull
+    @PositiveOrZero
     private Double preco;
+
+    @NotBlank
     private String descricao;
+
+    @NotBlank
     private String grupo;
+
+    @NotNull
+    @PositiveOrZero
     private Integer qtdEstoque;
 
     public String getNome() {

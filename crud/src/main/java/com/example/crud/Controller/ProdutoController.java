@@ -1,10 +1,12 @@
-package com.example.crud;
+package com.example.crud.Controller;
 
+import com.example.crud.Model.Produto;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -13,7 +15,7 @@ public class ProdutoController {
     private List<Produto> produtos = new ArrayList<>();
 
     @PostMapping
-    public ResponseEntity<Produto> criarProduto(@RequestBody Produto novoProduto) {
+    public ResponseEntity<Produto> criarProduto(@Valid @RequestBody Produto novoProduto) {
         produtos.add(novoProduto);
         return ResponseEntity.status(201).body(novoProduto);
     }
@@ -36,6 +38,7 @@ public class ProdutoController {
         return ResponseEntity.status(404).build();
     }
 
+
     @GetMapping("/estoque/{qtdEstoque}")
     public List<Produto> buscarPorEstoque(
             @PathVariable int qtdEstoque) {
@@ -44,6 +47,22 @@ public class ProdutoController {
                 filter(produtodaVez -> produtodaVez.getQtdEstoque() >= qtdEstoque)
                 .toList();
     }
+
+    @GetMapping("/grupo/{grupo}")
+    public List<Produto> getProdutosPorGrupo(@PathVariable String grupo) {
+        return produtos.stream()
+                .filter(produto -> produto.getGrupo().equalsIgnoreCase(grupo))
+                .collect(Collectors.toList());
+    }
+
+
+
+    @PutMapping("/{indice}")
+    public String atualizar(@PathVariable int indice, @Valid @RequestBody Produto produto){
+        produtos.set(indice, produto);
+        return "Produto atualizado";
+    }
+
 
 
 }
