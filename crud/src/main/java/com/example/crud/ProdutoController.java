@@ -1,5 +1,6 @@
 package com.example.crud;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -11,26 +12,28 @@ import java.util.List;
 public class ProdutoController {
     private List<Produto> produtos = new ArrayList<>();
 
-    @GetMapping
-    public List<Produto> listar() {
-        return produtos;
-    }
-
     @PostMapping
-    public Produto cadastrar(@RequestBody Produto produtoNovo) {
-        produtos.add(produtoNovo);
-        return produtoNovo;
+    public ResponseEntity<Produto> criarProduto(@RequestBody Produto novoProduto) {
+        produtos.add(novoProduto);
+        return ResponseEntity.status(201).body(novoProduto);
     }
 
-    @PutMapping("/{indice}")
-    public Produto atualizar(
-            @PathVariable int indice,
-            @RequestBody Produto produtoAtualizado) {
-        if (indice >= 0 && indice < produtos.size()) {
-            produtos.set(indice, produtoAtualizado);
-            return produtoAtualizado;
+    @GetMapping
+    public ResponseEntity<List<Produto>> getProdutos() {
+        if (produtos.isEmpty()) {
+            return ResponseEntity.status(204).build();
         }
-        return null;
+        return ResponseEntity.status(200).body(produtos);
+    }
+
+
+    @GetMapping("/{indice}")
+    public ResponseEntity<Produto> get(@PathVariable int indice) {
+        if (indice >=0 && indice < produtos.size()) {
+            return ResponseEntity.status(200)
+                    .body(produtos.get(indice));
+        }
+        return ResponseEntity.status(404).build();
     }
 
     @GetMapping("/estoque/{qtdEstoque}")
@@ -41,5 +44,7 @@ public class ProdutoController {
                 filter(produtodaVez -> produtodaVez.getQtdEstoque() >= qtdEstoque)
                 .toList();
     }
+
+
 }
 
