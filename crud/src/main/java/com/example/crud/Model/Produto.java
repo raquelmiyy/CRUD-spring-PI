@@ -40,6 +40,8 @@ public class Produto {
     @PositiveOrZero
     private Integer qtdEstoque;
 
+    //marca
+
 
     public Integer getCodigoProduto() {
         return codigoProduto;
