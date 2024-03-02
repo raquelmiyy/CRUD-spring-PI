@@ -1,12 +1,16 @@
 package com.example.crud.Controller;
 
+import com.example.crud.Model.Fornecedor;
 import com.example.crud.Model.Produto;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
 
 
 @RestController
@@ -48,23 +52,55 @@ public class ProdutoController {
                 .toList();
     }
 
-    @GetMapping("/grupo/{grupo}")
-    public List<Produto> getProdutosPorGrupo(@PathVariable String grupo) {
+    @GetMapping("/categoria/{categoria}")
+    public List<Produto> getProdutosPorCategoria(@PathVariable String categoria) {
         return produtos.stream()
-                .filter(produto -> produto.getGrupo().equalsIgnoreCase(grupo))
+                .filter(produto -> produto.getCategoria().equalsIgnoreCase(categoria))
                 .collect(Collectors.toList());
     }
 
 
+    @GetMapping("/preco")
+    public ResponseEntity<List<Produto>> buscarPorFaixaPreco(
+            @RequestParam("minimo") @PositiveOrZero Double precoMinimo,
+            @RequestParam("maximo") @PositiveOrZero Double precoMaximo) {
+        if (precoMinimo == null || precoMaximo == null || precoMinimo > precoMaximo) {
+            return ResponseEntity.status(400).build();
+        }
 
-    @PutMapping("/{indice}")
-    public String atualizar(@PathVariable int indice, @Valid @RequestBody Produto produto){
-        produtos.set(indice, produto);
-        return "Produto atualizado";
+        List<Produto> produtosNaFaixa = produtos.stream()
+                .filter(produto -> produto.getPreceDeVenda() >= precoMinimo && produto.getPreceDeVenda() <= precoMaximo)
+                .collect(Collectors.toList());
+
+        if (produtosNaFaixa.isEmpty()) {
+            return ResponseEntity.status(404).build();
+        }
+        return ResponseEntity.status(200).body(produtosNaFaixa);
     }
 
+    @PutMapping("/{indice}/estoque")
+    public ResponseEntity<String> atualizarEstoque(
+            @PathVariable int indice,
+            @RequestParam("qtdEstoque") @NotNull @PositiveOrZero Integer novaQuantidadeEstoque) {
+        if (indice >= 0 && indice < produtos.size()) {
+            Produto produto = produtos.get(indice);
+            produto.setQtdEstoque(novaQuantidadeEstoque);
+            return ResponseEntity.status(200).body("Quantidade em estoque do produto atualizada com sucesso.");
+        } else {
+            return ResponseEntity.status(404).body("Produto não encontrado.");
+        }
+    }
 
-    //validaçoes
+    @PutMapping("/{indice}")
+    public ResponseEntity<String> atualizarProduto(@PathVariable int indice,@Valid @RequestBody Produto produto) {
+            produtos.set(indice, produto);
+            return ResponseEntity.status(200).body("Produto atualizado com sucesso.");
+    }
+
+    @DeleteMapping("/{indice}")
+    public Produto delete(@PathVariable int indice){
+        return produtos.remove(indice);
+    }
 
 
 }
