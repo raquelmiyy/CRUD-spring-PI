@@ -1,7 +1,5 @@
 package com.example.crud.Model;
-
 import jakarta.validation.constraints.*;
-
 import java.time.LocalDate;
 
 public class Produto {
